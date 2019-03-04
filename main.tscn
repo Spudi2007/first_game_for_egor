@@ -1931,19 +1931,9 @@ directional_shadow_bias_split_scale = 0.25
 directional_shadow_depth_range = 0
 directional_shadow_max_distance = 200.0
 
-[node name="Player" parent="." index="8" instance=ExtResource( 5 )]
+[node name="InterpolatedCamera" type="InterpolatedCamera" parent="." index="8"]
 
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 41.7717, 0 )
-
-[node name="Position3D2" type="Position3D" parent="Player" index="3"]
-
-[node name="Position3D" type="Position3D" parent="Player/Position3D2" index="0"]
-
-transform = Transform( 1.15026e-008, 0.263751, -0.964591, -3.1452e-009, 0.964591, 0.263751, 1, 0, 1.19249e-008, -4.84329, 2.29153, 0 )
-
-[node name="InterpolatedCamera" type="InterpolatedCamera" parent="Player/Position3D2/Position3D" index="0"]
-
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+transform = Transform( 0, 0.263751, -0.964591, 0, 0.964591, 0.263751, 1, 0, 0, -4.84329, 44.0632, 0 )
 keep_aspect = 1
 cull_mask = 1048575
 environment = null
@@ -1955,10 +1945,30 @@ current = false
 fov = 70.0
 size = 1.0
 near = 0.05
-far = 100.0
-target = NodePath("../Player/Position3D2/Position3D")
+far = 1000.0
+target = NodePath("../Player/Rot_helper/camera_position")
 speed = 10.0
-enabled = false
+enabled = true
 _sections_unfolded = [ "Transform" ]
+
+[node name="Player" parent="." index="9" instance=ExtResource( 5 )]
+
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 41.7717, 0 )
+
+[node name="Rot_helper" type="Position3D" parent="Player" index="2"]
+
+[node name="right" type="Position3D" parent="Player/Rot_helper" index="0"]
+
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="forward" type="Position3D" parent="Player/Rot_helper" index="1"]
+
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="camera_position" type="Position3D" parent="Player/Rot_helper" index="2"]
+
+transform = Transform( 1.15026e-008, 0.263751, -0.964591, -3.1452e-009, 0.964591, 0.263751, 1, 0, 1.19249e-008, -4.84329, 2.29153, 0 )
 
 
