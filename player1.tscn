@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://player.gd" type="Script" id=1]
 [ext_resource path="res://woman_1.tscn" type="PackedScene" id=2]
@@ -7,15 +7,6 @@
 
 radius = 1.94289
 height = 0.112501
-
-[sub_resource type="SphereMesh" id=2]
-
-custom_aabb = AABB( 0, 0, 0, 0, 0, 0 )
-radius = 1.99
-height = 3.99
-radial_segments = 32
-rings = 16
-is_hemisphere = false
 
 [node name="KinematicBody" type="KinematicBody" index="0"]
 
@@ -39,57 +30,42 @@ shape = SubResource( 1 )
 disabled = false
 _sections_unfolded = [ "Transform" ]
 
-[node name="MeshInstance" type="MeshInstance" parent="." index="1"]
-
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, -1, 0, 1, -4.37114e-008, 0, 0, 0 )
-visible = false
-layers = 1
-material_override = null
-cast_shadow = 1
-extra_cull_margin = 0.0
-use_in_baked_light = false
-lod_min_distance = 0.0
-lod_min_hysteresis = 0.0
-lod_max_distance = 0.0
-lod_max_hysteresis = 0.0
-mesh = SubResource( 2 )
-skeleton = NodePath("..")
-material/0 = null
-_sections_unfolded = [ "Transform", "material" ]
-
-[node name="right" type="Position3D" parent="MeshInstance" index="0"]
-
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 0, 1, -4.37114e-008 )
-_sections_unfolded = [ "Transform" ]
-
-[node name="up" type="Position3D" parent="MeshInstance" index="1"]
-
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 0, -4.37114e-008, -1 )
-_sections_unfolded = [ "Transform" ]
-
-[node name="forward" type="Position3D" parent="MeshInstance" index="2"]
-
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 1, 0, 0 )
-_sections_unfolded = [ "Transform" ]
-
-[node name="Position3D" type="Position3D" parent="MeshInstance" index="3"]
-
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 0, 0, 0 )
-_sections_unfolded = [ "Transform" ]
-
-[node name="Position3D" type="Position3D" parent="MeshInstance/Position3D" index="0"]
-
-transform = Transform( 1.14358e-008, 0.283444, -0.958989, -3.38004e-009, 0.958989, 0.283444, 1, 2.22045e-016, 1.19249e-008, -5.31637, 3.03822, 0 )
-_sections_unfolded = [ "Transform" ]
-
-[node name="Position3D" type="Position3D" parent="." index="2"]
+[node name="Position3D" type="Position3D" parent="." index="1"]
 
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0 )
 _sections_unfolded = [ "Transform" ]
 
-[node name="Scene Root" parent="." index="3" instance=ExtResource( 2 )]
+[node name="Camera" type="Camera" parent="." index="2"]
 
-transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -3, 0 )
+transform = Transform( -1, 0, -8.74228e-008, -1.67132e-008, 0.981556, 0.191177, 8.58103e-008, 0.191177, -0.981556, 0, -0.0810207, -5.6625 )
+keep_aspect = 1
+cull_mask = 1048575
+environment = null
+h_offset = 0.0
+v_offset = 0.0
+doppler_tracking = 0
+projection = 0
+current = false
+fov = 30.9375
+size = 1.0
+near = 0.05
+far = 1000.0
+_sections_unfolded = [ "Transform" ]
+
+[node name="Mesh_rot_helper" type="Position3D" parent="." index="3"]
+
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.9, 0 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="Mesh" parent="Mesh_rot_helper" index="0" instance=ExtResource( 2 )]
+
+transform = Transform( -4.37114e-008, 0, -1, 0, 1, 0, 1, 0, -4.37114e-008, -1, 0, 0 )
+
+[node name="center" type="Position3D" parent="." index="4"]
+
+[node name="forward_local" type="Position3D" parent="center" index="0"]
+
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0 )
 _sections_unfolded = [ "Transform" ]
 
 
