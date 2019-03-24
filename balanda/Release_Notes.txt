@@ -1,0 +1,22 @@
+LICENSE
+
+BlenRig by Juan Pablo Bouza is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License.
+Based on a work at www.jpbouza.com.ar.
+
+-----------------------------------------
+
+BlenRig 4.01 is an Auto Rigging & Skinning System for Blender 2.57b
+
+Human Male Athletic model by Nick Zuccarello (http://www.nickzucc.blogspot.com)
+
+Thanks Nick!!
+
+BlenRig Addon by Bart Crouch (http://sites.google.com/site/bartiuscrouch)
+
+-----------------------------------------
+
+Changes in 4.01
+
+_Feature Request: added shoulder hinge for the arms. It works in FK and IK modes.
+_Fixed some Cyclic Dependencies 
+_Changed the position of master_torso bone so that it matches the actual center of gravity of the model
