@@ -1,0 +1,17 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/AK-47.obj-142baa3a270379c29e75a717084b6724.mesh"
+
+[deps]
+
+files=[ "res://.import/AK-47.obj-142baa3a270379c29e75a717084b6724.mesh" ]
+
+source_file="res://balanda/AK-47.obj"
+dest_files=[ "res://.import/AK-47.obj-142baa3a270379c29e75a717084b6724.mesh", "res://.import/AK-47.obj-142baa3a270379c29e75a717084b6724.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
