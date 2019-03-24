@@ -1,23 +1,26 @@
 extends MeshInstance
 
 # class member variables go here, for example:
-var M = ArrayMesh.new()
+#var M = ArrayMesh.new()
 var material = self.get_surface_material(0)
-var arr = Array()
+#var arr = Array()
 
 var thread = Thread.new()
-var thread_queue = [[3,4],[4,4],[5,4],[3,5],[4,5],[5,5]]
+var thread_queue = [[3,4,"d_s_gen"],[4,4,"d_s_gen"],[5,4,"d_s_gen"],[3,5,"d_s_gen"],[4,5,"d_s_gen"],[5,5,"d_s_gen"]]
 var big_map_move_queue = []
 
 
-var points = [Vector3(64, 64, 64)]
-var one_square_size = 32 # *4
 
 var map_current_location = Vector2(0,0)
 var big_map_location = Vector2(0,0)
 var map_size = 11 # this for archive points only REAL MAP SIZE = THIS - 2
 var map = []
 
+var second_thread = Thread.new()
+var tree_mesh
+var tree_col_shape
+var tree_mat
+var tree_queue = []
 
 
 func _ready():
@@ -27,14 +30,18 @@ func _ready():
 			var u2 = Array()
 			u.append(u2)
 		map.append(u)
+		
+	tree_mesh = get_node("../Tree").mesh
+	tree_col_shape = get_node("../Tree").mesh.create_trimesh_shape()
+	tree_mat = [get_node("../Tree").get_surface_material(0), get_node("../Tree").get_surface_material(1)]
 	pass
 
 func _process(delta):
 	if Input.is_action_just_pressed('2'):
-		center_of_map_move("left")
-		
+#		place_trees([32, 0, 0])
+		thread_queue.append([0, 0, "place_trees"])
 	if Input.is_action_just_pressed('3'):
-		center_of_map_move("up")
+		pass
 		
 	if Input.is_action_just_pressed('1'):
 		center_of_map_move("right")
@@ -42,11 +49,38 @@ func _process(delta):
 		center_of_map_move("down")
 			
 	if thread_queue and !thread.is_active():
-		thread.start(self, "d_s_gen", [32, thread_queue[0][0], thread_queue[0][1]])
+		thread.start(self, thread_queue[0][2], [32, thread_queue[0][0], thread_queue[0][1]])
 		thread_queue.pop_front()
-	if big_map_move_queue and !thread_queue and !thread.is_active():
+	if big_map_move_queue and !thread_queue and !thread.is_active() and !tree_queue:
 		center_of_map_move(big_map_move_queue[0])
 		big_map_move_queue.pop_front()
+		for object in get_node("../objects").get_children():
+			if abs(object.global_transform.origin.x) > 512 or abs(object.global_transform.origin.z) > 512:
+				object.call_deferred("queue_free")
+		for object in get_node("../obj_col").get_children():
+			if abs(object.global_transform.origin.x) > 512 or abs(object.global_transform.origin.z) > 512:
+				object.call_deferred("queue_free")
+	if tree_queue:
+		var r_amount = 5.0
+		var r_vec = Vector3(rand_range(-r_amount, r_amount), 0,rand_range(-r_amount, r_amount))
+		var space_state = get_world().direct_space_state
+		var result = space_state.intersect_ray(tree_queue[0] + r_vec, tree_queue[0] + Vector3(0,-400,0) + r_vec, [self])
+#		var r_amount = 5.0
+#		var r_vec = Vector3(rand_range(-r_amount, r_amount), 0,rand_range(-r_amount, r_amount))
+		if result:
+			if result["normal"].y > 0.8:
+				var tree_col = CollisionShape.new()
+				var tree = MeshInstance.new()
+				get_node("../obj_col").add_child(tree_col)
+				get_node("../objects").add_child(tree)
+				result["position"].y -= rand_range(0, r_amount)
+				tree.global_transform.origin = result["position"]
+				tree_col.global_transform.origin = result["position"]
+				tree.mesh = tree_mesh
+				tree_col.shape = tree_col_shape
+				tree.set_surface_material(0, tree_mat[0])
+				tree.set_surface_material(1, tree_mat[1])
+		tree_queue.pop_front()
 		
 		
 		
@@ -83,27 +117,28 @@ func _process(delta):
 				map_current_location.x += 128
 			elif get_node("../Player").global_transform.origin.x - map_current_location.x < 0:
 				map_current_location.x -= 128
-			print(map_current_location)
+#			print(map_current_location)
 		elif abs(get_node("../Player").global_transform.origin.z - map_current_location.y) >= 128/2:
 			if get_node("../Player").global_transform.origin.z - map_current_location.y > 0:
 				map_current_location.y += 128
 			elif get_node("../Player").global_transform.origin.z - map_current_location.y < 0:
 				map_current_location.y -= 128
-			print(map_current_location)
+#			print(map_current_location)
 			
 		
 		for i in range(5):
 			for j in range(5):
 				if !get_node("../map").get_child((map_current_location.x/128) + i + 2).get_child(map_current_location.y/128 + j + 2).mesh:
-					thread_queue.append([(map_current_location.x/128) + i + 2, map_current_location.y/128 + j + 2])
+					thread_queue.append([(map_current_location.x/128) + i + 2, map_current_location.y/128 + j + 2, "d_s_gen"])
+#					thread_queue.append([(map_current_location.x/128) + i + 2, map_current_location.y/128 + j + 2, "place_trees"])
+					for k in range(-3, 5, 1):
+						for l in range(-3, 5, 1):
+							tree_queue.append(Vector3(map_current_location.x/128 + i - 2, 0, map_current_location.y/128 + j - 2)*128 + Vector3(k * 16, 200, l * 16))
 		
 		
 
 # NEED TO MADE THIS FUNC !!!!
 func center_of_map_move(direction):
-	
-	
-	
 	if direction == "right":
 		get_node("../map").get_child(0).global_transform.origin.x += 128 * 9
 		get_node("../Col_map").get_child(0).global_transform.origin.x += 128 * 9
@@ -116,7 +151,7 @@ func center_of_map_move(direction):
 		get_node("../map").move_child(get_node("../map").get_child(0), 8)
 		get_node("../Col_map").move_child(get_node("../Col_map").get_child(0), 8)
 		for i in range(map_size-1):
-			print(i)
+#			print(i)
 			map[i] = map[i+1]
 		map[map_size-1] = [[],[],[],[],[],[],[],[],[],[],[]]
 		map_current_location.x -= 128
@@ -179,7 +214,7 @@ func center_of_map_move(direction):
 
 
 func made_mesh(arr):
-	var s = 0
+#	var s = 0
 	var result = PoolVector3Array()
 	var tmpMesh = ArrayMesh.new()
 	var arrays = Array()
@@ -206,6 +241,7 @@ func made_mesh(arr):
 		n_arr.append(useless1)
 		n_arr.append(useless1)
 	arrays[ArrayMesh.ARRAY_NORMAL] = n_arr
+
 
 
 
@@ -288,7 +324,7 @@ func d_s_gen(args):
 	var tmpMesh
 	var array = []
 	var step = 1
-	var pos = [args[1], args[2]]
+#	var pos = [args[1], args[2]]
 	var points = map[args[1]][args[2]]
 	
 #	if points:
@@ -310,10 +346,6 @@ func d_s_gen(args):
 	for i in range(points.size()):
 		array[points[i].x][points[i].z] = points[i]
 		
-#	print(array)
-#
-#
-#	print(args)
 	for i in range(7):
 		square(array, step, 0.2, size)
 		diamond(array, step, 0.2, size)
@@ -322,7 +354,6 @@ func d_s_gen(args):
 	
 #ADDING POINTS TO MAP
 
-	print('start', args)
 	for i in range(array.size()):
 		if array[i][size] in map[args[1]][args[2]+1]:
 			pass
@@ -349,19 +380,11 @@ func d_s_gen(args):
 	get_node("../Col_map").get_child(args[1]-1).get_child(args[2]-1).shape = tmpMesh.create_trimesh_shape()
 	tmpMesh.surface_set_material(0, material)
 	
-	call_deferred("load_done")
 
+	call_deferred("load_done")
+	
 	return([tmpMesh, args[1], args[2], mat])
 	
 func load_done():
 	var a = thread.wait_to_finish()
 	get_node("../map").get_child(a[1]-1).get_child(a[2]-1).mesh = a[0]
-#	get_node("../map").get_child(a[1]-1).get_child(a[2]-1).set_surface_material(0, a[3])
-
-	
-	
-	
-func do_all():
-	if (thread.is_active()):
-		return
-	thread.start(self, "d_s_gen", 64)

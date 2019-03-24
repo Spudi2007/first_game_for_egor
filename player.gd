@@ -15,7 +15,8 @@ var pounce = 0
 var right = Vector3()
 var forward = Vector3()
 
-
+var anim_tree
+var status = "in_flight"
 var camera
 var rotation_helper
 
@@ -26,7 +27,7 @@ var MOUSE_SENSITIVITY = 0.1
 func _ready():
 	camera = get_node("Rot_helper/camera_position")
 	rotation_helper = get_node("Rot_helper")
-
+	anim_tree = get_node("Mesh_rot_helper/Mesh").get_node("AnimationTree")
 	
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 #	set_process(true)
@@ -52,34 +53,52 @@ func _process(delta):
 		V -= right * speed
 	if Input.is_action_pressed("move_right"):
 		V += right * speed
+		
+	if Input.is_action_pressed("shift"):
+		V *= 3
 	if Input.is_action_just_pressed("ui_accept"):
 		down_speed += Vector3(0, 20, 0)
 		pounce = 1
-		get_node("Mesh_rot_helper/Mesh").get_node("AnimationTreePlayer").oneshot_node_start("oneshot")
+#		get_node("Mesh_rot_helper/Mesh").get_node("AnimationTreePlayer").oneshot_node_start("jump")
 
 
 	
 	space_state = get_world().direct_space_state
-	var result = space_state.intersect_ray(self.global_transform.origin, self.global_transform.origin + Vector3(0,-3,0), [self])
+	var result = space_state.intersect_ray(self.global_transform.origin, self.global_transform.origin + Vector3(0,-3.1,0), [self])
 	down_speed += g * delta
 	if result and pounce < 0:
 		self.global_transform.origin = result["position"] + Vector3(0, 3, 0)
 #		print(result)
 		if result["normal"].y > 0.8:
-			get_node("Mesh_rot_helper/Mesh").get_node("AnimationTreePlayer").oneshot_node_stop("oneshot")
+			status = "on_floor"
+#			get_node("Mesh_rot_helper/Mesh").get_node("AnimationTreePlayer").blend2_node_set_amount("jump", .0)
 			down_speed = Vector3(0,0,0)
-#	result = space_state.intersect_ray(self.global_transform.origin, self.global_transform.origin + Vector3(0,-3,0), [self])
+	else:
+		status = "in_flight"
 	V += down_speed
 	move_and_slide(V)
-	# anims
+	
+	
+	
+	# ANIME
+	
+	if (pounce == 1) or (status == "in_flight" and !get_node("Mesh_rot_helper/Mesh").get_node("AnimationTree")["parameters/jump/active"] and down_speed.y < -10):
+		anim_tree["parameters/jump/active"] = true
+	elif status == "on_floor" and get_node("Mesh_rot_helper/Mesh").get_node("AnimationTree")["parameters/jump/active"]:
+		anim_tree["parameters/jump/active"] = false
+#
+
+	
 #	var u = Vector3(current_speed.x, 0, current_speed.z).cross(Vector3(1,0,0))
 #	get_node("Mesh_rot_helper").rotation.y = Vector3(current_speed.x, 0, current_speed.z).angle_to(Vector3(1,0,0)) * -sign(u.y)
 	if Vector3(current_speed.x, 0, current_speed.z).length() > 1:
 		var u = Vector3(current_speed.x, 0, current_speed.z).cross(Vector3(1,0,0))
 		get_node("Mesh_rot_helper").rotation.y = Vector3(current_speed.x, 0, current_speed.z).angle_to(Vector3(1,0,0)) * -sign(u.y)
-#		get_node("Mesh_rot_helper").rotation.z = current_speed.angle_to(right)
-#		get_node("Mesh_rot_helper/Mesh").get_node("AnimationPlayer")
-	pass
+#		print(Vector3(current_speed.x, 0, current_speed.z).length())
+		anim_tree["parameters/run/blend_amount"] = 1
+	else:
+		anim_tree["parameters/run/blend_amount"] = 0
+
 
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
